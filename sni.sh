@@ -110,5 +110,4 @@ http {\
     include /etc/nginx/conf.d/*.conf;\
 }' /etc/nginx/nginx.conf
 
-# Test and restart Nginx
 nginx -t && systemctl restart nginx
