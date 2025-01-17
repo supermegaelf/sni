@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Function to prompt for user input
 get_user_input() {
     read -p "SNI domain: " DOMAIN
     read -p "Email address for certbot: " EMAIL
@@ -8,17 +7,14 @@ get_user_input() {
     read -p "CF API key: " CF_API_KEY
 }
 
-# Get user input
 get_user_input
 
-# Install required packages
 apt install snapd -y
 snap install --classic certbot
 ln -s /snap/bin/certbot /usr/bin/certbot
 snap set certbot trust-plugin-with-root=ok
 snap install certbot-dns-cloudflare
 
-# Create and secure the secrets directory
 mkdir -p /root/.secrets/
 cat > /root/.secrets/cloudflare.ini << EOF
 dns_cloudflare_email = "${CF_EMAIL}"
@@ -27,7 +23,6 @@ EOF
 chmod 700 /root/.secrets/
 chmod 400 /root/.secrets/cloudflare.ini
 
-# Get SSL certificate
 certbot certonly --dns-cloudflare \
     --dns-cloudflare-credentials /root/.secrets/cloudflare.ini \
     --dns-cloudflare-propagation-seconds 30 \
@@ -37,14 +32,12 @@ certbot certonly --dns-cloudflare \
     --agree-tos \
     --non-interactive
 
-# Create SSL configuration
 cat > /etc/nginx/snippets/ssl.conf << EOF
 ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
 ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
 ssl_dhparam /etc/ssl/certs/dhparam.pem;
 EOF
 
-# Create Nginx site configuration
 cat > /etc/nginx/conf.d/sni-site.conf << EOF
 server {
     server_name  ${DOMAIN};
@@ -64,10 +57,8 @@ server {
 }
 EOF
 
-# Download SNI page
 wget -q https://raw.githubusercontent.com/supermegaelf/sni-page/main/sni.html -O /usr/share/nginx/html/sni.html
 
-# Update Nginx main configuration
 sudo sed -i.bak -e '/^http {/,/^}/c\
 http {\
     include       /etc/nginx/mime.types;\
