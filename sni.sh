@@ -68,57 +68,56 @@ EOF
 wget -q https://raw.githubusercontent.com/supermegaelf/sni-page/main/sni.html -O /usr/share/nginx/html/sni.html
 
 # Update Nginx main configuration
-cat > /etc/nginx/nginx.conf << 'EOF'
-http {
-    include       /etc/nginx/mime.types;
-    default_type  application/octet-stream;
-
-    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
-                      '$status $body_bytes_sent "$http_referer" '
-                      '"$http_user_agent" "$http_x_forwarded_for"';
-
-    access_log  /var/log/nginx/access.log  main;
-
-    sendfile        on;
-    #tcp_nopush     on;
-
-    keepalive_timeout  65;
-
-    gzip on;
-    gzip_disable "msie6";
-
-    gzip_vary on;
-    gzip_proxied any;
-    gzip_comp_level 6;
-    gzip_buffers 16 8k;
-    gzip_http_version 1.1;
-    gzip_min_length 256;
-    gzip_types
-      application/atom+xml
-      application/geo+json
-      application/javascript
-      application/x-javascript
-      application/json
-      application/ld+json
-      application/manifest+json
-      application/rdf+xml
-      application/rss+xml
-      application/xhtml+xml
-      application/xml
-      font/eot
-      font/otf
-      font/ttf
-      image/svg+xml
-      text/css
-      text/javascript
-      text/plain
-      text/xml;
-
-    resolver 8.8.8.8 8.8.4.4;
-
-    include /etc/nginx/conf.d/*.conf;
-}
-EOF
+sudo sed -i.bak -e '/^http {/,/^}/c\
+http {\
+    include       /etc/nginx/mime.types;\
+    default_type  application/octet-stream;\
+\
+    log_format  main  '\''$remote_addr - $remote_user [$time_local] "$request" '\''\
+                      '\''$status $body_bytes_sent "$http_referer" '\''\
+                      '\''"$http_user_agent" "$http_x_forwarded_for"'\'';\
+\
+    access_log  /var/log/nginx/access.log  main;\
+\
+    sendfile        on;\
+    #tcp_nopush     on;\
+\
+    keepalive_timeout  65;\
+\
+    gzip on;\
+    gzip_disable "msie6";\
+\
+    gzip_vary on;\
+    gzip_proxied any;\
+    gzip_comp_level 6;\
+    gzip_buffers 16 8k;\
+    gzip_http_version 1.1;\
+    gzip_min_length 256;\
+    gzip_types\
+      application/atom+xml\
+      application/geo+json\
+      application/javascript\
+      application/x-javascript\
+      application/json\
+      application/ld+json\
+      application/manifest+json\
+      application/rdf+xml\
+      application/rss+xml\
+      application/xhtml+xml\
+      application/xml\
+      font/eot\
+      font/otf\
+      font/ttf\
+      image/svg+xml\
+      text/css\
+      text/javascript\
+      text/plain\
+      text/xml;\
+\
+    resolver 8.8.8.8 8.8.4.4;\
+\
+    include /etc/nginx/conf.d/*.conf;\
+}' /etc/nginx/nginx.conf
 
 # Test and restart Nginx
 nginx -t && systemctl restart nginx
